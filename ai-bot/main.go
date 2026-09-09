@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"gezyclass/ai-bot/internal/pocketbase"
+	reportcmd "gezyclass/ai-bot/internal/report"
 	"gezyclass/ai-bot/internal/staging"
 )
 
@@ -201,6 +202,9 @@ func main() {
 	}
 	backupCmd.Flags().StringVar(&backupDir, "backup-dir", "", "Backup destination directory")
 	rootCmd.AddCommand(backupCmd)
+
+	// report command
+	rootCmd.AddCommand(reportcmd.NewCommand(client))
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

@@ -1,0 +1,114 @@
+{{ define "main" }}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--page-bg);color:var(--text);min-height:100vh}
+.box{max-width:760px;margin:32px auto;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.box h2{font-size:22px;margin-bottom:8px;text-align:center}
+.box p{color:var(--sub);font-size:14px;text-align:center;margin-bottom:18px}
+.box label{display:block;font-weight:600;margin:14px 0 4px}
+.box input{width:100%;padding:12px 14px;border:1px solid var(--input-border);border-radius:10px;font-size:16px;background:var(--input-bg);color:var(--text)}
+.box button{width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:18px}
+.box button.ghost{background:var(--btn-ghost);color:var(--btn-ghost-text);margin-top:10px}
+.small{font-size:13px;color:var(--sub);text-align:center;margin-top:10px}
+.loading{text-align:center;padding:40px;color:var(--sub);font-size:17px}
+.rekap-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.rekap-head h2{font-size:20px}
+.badge{display:inline-block;background:var(--amber-bg);color:var(--amber-text);font-size:11px;padding:2px 10px;border-radius:12px}
+table{width:100%;border-collapse:collapse;margin:10px 0 20px;font-size:14px}
+th,td{border:1px solid var(--row-border);padding:8px 10px;text-align:left}
+th{background:var(--thead-bg);font-weight:600}
+tr:nth-child(even){background:rgba(0,0,0,.02)}
+.hidden{display:none}
+.exam-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.exam-card h3{font-size:17px;margin-bottom:4px}
+.exam-card .meta{font-size:13px;color:var(--sub);margin-bottom:12px}
+.wrap-table{overflow-x:auto}
+.pagination{display:flex;flex-direction:row;justify-content:center;align-items:center;gap:5px;flex-wrap:nowrap;overflow-x:auto;margin:14px 0 4px;padding:2px 0}
+.pagination button{flex:0 0 auto;width:auto;min-width:32px;height:32px;padding:4px 8px;margin:0;border:1px solid var(--card-border);border-radius:7px;background:var(--card);color:var(--text);font-size:13px;font-weight:600;line-height:1;cursor:pointer}
+.pagination button:hover:not(:disabled){background:var(--accent);color:#fff;border-color:var(--accent)}
+.pagination button:disabled{opacity:.45;cursor:not-allowed}
+.pagination-info{font-size:13px;color:var(--sub);text-align:center;margin-top:8px}
+.murid-layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:20px;align-items:start;max-width:1100px;margin:24px auto;padding:0 16px}
+.sidebar{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:16px;box-shadow:0 4px 24px rgba(0,0,0,.06);position:sticky;top:20px}
+.sidebar-title{font-size:16px;font-weight:700;margin-bottom:12px}
+.content-box{min-width:0}
+.exam-menu{display:block;margin:4px 0 8px;padding:6px;background:var(--page-bg);border:1px solid var(--card-border);border-radius:10px;max-height:520px;overflow-y:auto}
+.mg{font-size:13px;margin:2px 0}
+.mg-btn{display:block;width:100%;text-align:left;padding:7px 10px;border:none;border-radius:8px;background:none;color:var(--text);font-weight:700;font-size:13px;cursor:pointer}
+.mg-btn:hover,.mb-btn:hover{background:var(--btn-ghost)}
+.mg-btn .arrow,.mb-btn .arrow{float:right;font-size:11px}
+.mg-body{display:none;padding-left:8px;border-left:2px solid var(--card-border);margin-left:6px}
+.mg-body.open{display:block}
+.mb-btn{display:block;width:100%;text-align:left;padding:6px 8px;border:none;border-radius:7px;background:none;color:var(--text);font-size:13px;cursor:pointer}
+.mb-body{display:none;padding-left:8px;border-left:2px solid var(--card-border);margin-left:6px}
+.mb-body.open{display:block}
+.empty{display:block;padding:6px 8px;color:var(--sub);font-size:12.5px}
+@media(max-width:760px){
+  .murid-layout{grid-template-columns:1fr;padding:0 10px}
+  .sidebar{position:static}
+  .box{padding:20px 16px;margin:20px auto}
+}
+</style>
+<div id="app">
+<div id="main-view">
+<div class="murid-layout">
+<aside class="sidebar">
+<div class="sidebar-title">👥 Data Murid</div>
+<div id="murid-menu" class="exam-menu">
+  <div class="mg"><button class="mg-btn" onclick="tg(this)">Tahun 2026–2027 <span class="arrow">▾</span></button><div class="mg-body open">
+    <div class="mg"><button class="mb-btn" data-kelas="7" onclick="showMurid('7')">Kelas 7</button></div>
+    <div class="mg"><button class="mb-btn" data-kelas="8" onclick="showMurid('8')">Kelas 8</button></div>
+    <div class="mg"><button class="mb-btn" onclick="tg(this)">Kelas 9 <span class="arrow">▾</span></button><div class="mb-body"><span class="empty">Data murid belum diinput</span></div></div>
+  </div></div>
+  <div class="mg"><button class="mg-btn" onclick="tg(this)">Tahun 2027–2028 <span class="arrow">▾</span></button><div class="mg-body"><span class="empty">Data murid belum diinput</span></div></div>
+  <div class="mg"><button class="mg-btn" onclick="tg(this)">Tahun 2028–2029 <span class="arrow">▾</span></button><div class="mg-body"><span class="empty">Data murid belum diinput</span></div></div>
+  <div class="mg"><button class="mg-btn" onclick="tg(this)">Tahun 2029–2030 <span class="arrow">▾</span></button><div class="mg-body"><span class="empty">Data murid belum diinput</span></div></div>
+</div>
+</aside>
+<main class="content-box">
+<div class="box" style="max-width:none">
+<div class="rekap-head">
+<h2>👥 Data Murid</h2>
+</div>
+<div id="murid-tab"><div class="loading">Pilih kelas pada menu di samping.</div></div>
+</div>
+</main>
+</div>
+</div>
+</div>
+<script>
+var MURID_CLASS="",MURID_PAGE=1,MURID_PAGE_SIZE=20;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function tg(btn){
+  var b=btn.nextElementSibling;
+  if(!b)return;
+  b.classList.toggle("open");
+  var a=btn.querySelector(".arrow");
+  if(a)a.textContent=b.classList.contains("open")?"▴":"▾";
+}
+function showMurid(kelas){
+  MURID_CLASS=String(kelas);
+  MURID_PAGE=1;
+  renderMurid();
+}
+function changeMuridPage(delta){
+  MURID_PAGE=Math.max(1,MURID_PAGE+Number(delta||0));
+  renderMurid();
+}
+function renderMurid(){
+  var kelas=MURID_CLASS;
+  if(!kelas)return;
+  var el=document.getElementById("murid-tab");
+  var rows=(kelas==="7"||kelas==="8")?Object.keys(STUDENTS).filter(function(k){return k.indexOf(kelas+".")===0}).sort().reduce(function(a,k){return a.concat(STUDENTS[k].map(function(s){return [s[0],s[1],s[2],k,s[3]]}))},[]):(STUDENTS[kelas]||[]).map(function(s){return [s[0],s[1],s[2],kelas,s[3]]});
+  var totalPages=Math.max(1,Math.ceil(rows.length/MURID_PAGE_SIZE));
+  MURID_PAGE=Math.min(MURID_PAGE,totalPages);
+  var start=(MURID_PAGE-1)*MURID_PAGE_SIZE,shown=rows.slice(start,start+MURID_PAGE_SIZE);
+  var label=kelas==="8"?"8 (8.1–8.8)":kelas==="7"?"7 (7.1–7.8)":kelas;
+  var html='<div class="exam-card"><h3>Data Murid Kelas '+esc(label)+' <span class="badge">2026–2027</span></h3><div class="meta">Jumlah siswa: '+rows.length+' · Halaman '+MURID_PAGE+' dari '+totalPages+'</div><div class="wrap-table"><table><thead><tr><th>No. Absen</th><th>Nama Siswa</th><th>L/P</th><th>Kelas</th><th>NISN</th></tr></thead><tbody>'+shown.map(function(s){return '<tr><td>'+esc(s[0])+'</td><td>'+esc(s[1])+'</td><td>'+esc(s[2])+'</td><td>'+esc(s[3])+'</td><td>'+esc(s[4])+'</td></tr>'}).join("")+'</tbody></table></div><div class="pagination"><button onclick="changeMuridPage(-1)" '+(MURID_PAGE===1?"disabled":"")+' aria-label="Halaman sebelumnya">‹</button><span class="pagination-info"> '+MURID_PAGE+' / '+totalPages+' </span><button onclick="changeMuridPage(1)" '+(MURID_PAGE===totalPages?"disabled":"")+' aria-label="Halaman berikutnya">›</button></div></div>';
+  el.innerHTML=html;
+  document.querySelectorAll("#murid-menu [data-kelas]").forEach(function(btn){btn.classList.toggle("active",btn.dataset.kelas===kelas)});
+}
+{{ partial "murid-data.html" . | safeJS }}
+showMurid("7");
+</script>
+{{ end }}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -52,7 +53,12 @@ func (c *Client) auth() error {
 	defer resp.Body.Close()
 
 	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("auth response decode failed: %w", err)
+	}
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("auth failed with HTTP %d: %v", resp.StatusCode, result["message"])
+	}
 	t, ok := result["token"].(string)
 	if !ok {
 		return fmt.Errorf("no token in response")
@@ -89,7 +95,13 @@ func (c *Client) do(method, path string, body interface{}) (map[string]interface
 	defer resp.Body.Close()
 
 	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("PocketBase response decode failed: %w", err)
+	}
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		message := result["message"]
+		return nil, fmt.Errorf("PocketBase request failed with HTTP %d: %v", resp.StatusCode, message)
+	}
 	return result, nil
 }
 
@@ -110,6 +122,36 @@ func (c *Client) List(collection string, filter string) ([]map[string]interface{
 	if err != nil {
 		return nil, err
 	}
+	return recordsFromResult(result), nil
+}
+
+// ListAll returns every record, paging through PocketBase's 500-record page
+// limit. Existing callers that intentionally use List remain unchanged.
+func (c *Client) ListAll(collection string, filter string) ([]map[string]interface{}, error) {
+	var records []map[string]interface{}
+	for page := 1; ; page++ {
+		path := "/api/collections/" + collection + "/records?page=" + strconv.Itoa(page) + "&perPage=500"
+		if filter != "" {
+			path += "&filter=" + url.QueryEscape(filter)
+		}
+		result, err := c.do("GET", path, nil)
+		if err != nil {
+			return nil, err
+		}
+		pageRecords := recordsFromResult(result)
+		records = append(records, pageRecords...)
+
+		totalPages := 0
+		if value, ok := result["totalPages"].(float64); ok {
+			totalPages = int(value)
+		}
+		if len(pageRecords) == 0 || (totalPages > 0 && page >= totalPages) || (totalPages == 0 && len(pageRecords) < 500) {
+			return records, nil
+		}
+	}
+}
+
+func recordsFromResult(result map[string]interface{}) []map[string]interface{} {
 	items, _ := result["items"].([]interface{})
 	var records []map[string]interface{}
 	for _, item := range items {
@@ -117,7 +159,7 @@ func (c *Client) List(collection string, filter string) ([]map[string]interface{
 			records = append(records, m)
 		}
 	}
-	return records, nil
+	return records
 }
 
 func (c *Client) GetOrCreate(collection string, record map[string]interface{}, filter string) (map[string]interface{}, error) {

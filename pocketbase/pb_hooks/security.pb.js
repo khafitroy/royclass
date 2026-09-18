@@ -24,17 +24,27 @@ routerAdd("POST", "/api/exam/start", function (c) {
       return c.json(400, { message: "Nama sekolah hanya boleh huruf, angka, dan spasi (maksimal 30 karakter)." });
     }
     var sekolah = sekolahRaw.slice(0, 30);
+    var sessCol = $app.findCollectionByNameOrId("exam_sessions");
     var col = $app.findCollectionByNameOrId("exam_tokens");
     var found = $app.findRecordsByFilter(col,
-      "token = " + qs(token) + " && exam_id = " + qs(examId) + " && (is_shared = true || is_used = false)", "", 1, 0);
+      "token = " + qs(token) + " && exam_id = " + qs(examId), "", 1, 0);
     if (found.length === 0) return c.json(400, { message: "Token tidak valid atau sudah digunakan!" });
     var tk = found[0];
-    if (!tk.get("is_shared")) {
+    var shared = !!tk.get("is_shared");
+    var participantFilter = "token = " + qs(token) + " && exam_id = " + qs(examId) +
+      " && status = 'ongoing' && nama = " + qs(nama) +
+      " && no_absen = " + String(parseInt(noAbsen, 10) || 0) +
+      " && kelas = " + qs(kelas);
+    var existing = $app.findRecordsByFilter(sessCol, participantFilter, "", 1, 0);
+    if (existing.length > 0) return c.json(200, { id: existing[0].id });
+    if (!shared && tk.get("is_used")) {
+      return c.json(400, { message: "Token tidak valid atau sudah digunakan!" });
+    }
+    if (!shared) {
       var usedOnce = $app.findRecordsByFilter($app.findCollectionByNameOrId("exam_sessions"),
         "token = " + qs(token) + " && exam_id = " + qs(examId), "", 1, 0);
       if (usedOnce.length > 0) return c.json(400, { message: "Token sudah digunakan." });
     }
-    var sessCol = $app.findCollectionByNameOrId("exam_sessions");
     var rec = new Record(sessCol);
     rec.set("exam_id", examId);
     rec.set("token", token);
@@ -269,6 +279,8 @@ routerAdd("POST", "/api/exam/submit", function (c) {
     sess.set("total_score", survey ? 0 : total);
     sess.set("max_score", survey ? 0 : max);
     $app.save(sess);
+    var hideReview = String(exam.id || exam.get("id") || "") === "e31b5ex1n310lck" ||
+      String(exam.get("title") || "") === "Asesmen Bahasa Inggris SMP Kelas 9 — Komunikasi dan Opini";
     return c.json(200, {
       total_score: survey ? 0 : total, max_score: survey ? 0 : max,
       correct: survey ? 0 : correct, wrong: survey ? 0 : wrong, empty: survey ? 0 : empty,
@@ -278,8 +290,8 @@ routerAdd("POST", "/api/exam/submit", function (c) {
       nama: sess.get("nama"), kelas: sess.get("kelas"),
       exam_title: exam.get("title") || "Ujian",
       show_score: survey ? false : !!exam.get("show_score_after"),
-      show_explanation: survey ? false : !!exam.get("show_explanation_after"),
-      review: survey ? [] : review
+      show_explanation: survey || hideReview ? false : !!exam.get("show_explanation_after"),
+      review: survey || hideReview ? [] : review
     });
   } catch (e) {
     return c.json(500, { message: "Terjadi kesalahan: " + e.message });
@@ -354,6 +366,8 @@ routerAdd("GET", "/api/exam/review", function (c) {
         }
       } catch (e3) {}
     }
+    var hideReview = String(exam.id || exam.get("id") || "") === "e31b5ex1n310lck" ||
+      String(exam.get("title") || "") === "Asesmen Bahasa Inggris SMP Kelas 9 — Komunikasi dan Opini";
     return c.json(200, {
       nama: sess.get("nama"), kelas: sess.get("kelas"), no_absen: sess.get("no_absen"),
       exam_title: exam.get("title") || "Ujian",
@@ -361,11 +375,11 @@ routerAdd("GET", "/api/exam/review", function (c) {
       survey_type: surveyType,
       profile: prof,
       show_score: survey ? false : !!exam.get("show_score_after"),
-      show_explanation: survey ? false : !!exam.get("show_explanation_after"),
+      show_explanation: survey || hideReview ? false : !!exam.get("show_explanation_after"),
       total_score: survey ? 0 : (sess.get("total_score") || 0),
       max_score: survey ? 0 : (sess.get("max_score") || 0),
       correct: survey ? 0 : correct, wrong: survey ? 0 : wrong, empty: survey ? 0 : empty,
-      review: survey ? [] : review
+      review: survey || hideReview ? [] : review
     });
   } catch (e) {
     return c.json(500, { message: "Terjadi kesalahan: " + e.message });

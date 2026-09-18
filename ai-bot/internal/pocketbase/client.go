@@ -93,6 +93,9 @@ func (c *Client) do(method, path string, body interface{}) (map[string]interface
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNoContent {
+		return map[string]interface{}{}, nil
+	}
 
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

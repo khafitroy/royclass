@@ -308,7 +308,18 @@ func (i *Importer) upsertExam(doc Document, result *SeedResult) error {
 			result.Skipped++
 			return nil
 		}
-		if _, err := i.Client.Update("exams", existing.RecordID, payload.examFields); err != nil {
+		// PocketBase treats false as blank for this required legacy field. Keep
+		// the source setting authoritative in the result hook, but omit the
+		// field on updates so an explicit false can still be synchronized.
+		examFields := payload.examFields
+		if !boolValue(doc.Meta["show_explanation_after"], true) {
+			examFields = make(map[string]any, len(payload.examFields))
+			for key, value := range payload.examFields {
+				examFields[key] = value
+			}
+			delete(examFields, "show_explanation_after")
+		}
+		if _, err := i.Client.Update("exams", existing.RecordID, examFields); err != nil {
 			return fmt.Errorf("%s: update exam failed: %w", doc.Path, err)
 		}
 		if err := i.clearExamRelations(existing.RecordID); err != nil {
@@ -371,31 +382,49 @@ func (i *Importer) clearExamRelations(examID string) error {
 }
 
 type examImport struct {
-	examFields map[string]any
-	questions  []string
-	tokens     []string
+	examFields   map[string]any
+	questions    []string
+	tokens       []string
+	points       int
+	sharedTokens bool
 }
 
 func (i *Importer) syncExamRelations(examID string, payload examImport) error {
 	for idx, qRef := range payload.questions {
 		qID, err := i.resolveRecordID("question", qRef)
 		if err != nil {
-			return err
+			// resolveSourceIDList may already have converted a source_id to
+			// a PocketBase record ID. It may also contain a direct record ID.
+			qID = qRef
 		}
 		if _, err := i.Client.Create("exam_questions", map[string]any{
 			"exam_id":     examID,
 			"question_id": qID,
 			"order_num":   idx + 1,
-			"points":      10,
+			"points":      payload.points,
 		}); err != nil {
 			return fmt.Errorf("exam_questions link failed for %s: %w", qRef, err)
 		}
 	}
 	for _, token := range payload.tokens {
+		existing, err := i.Client.List("exam_tokens", fmt.Sprintf("exam_id='%s' && token='%s'", examID, strings.ReplaceAll(token, "'", "''")))
+		if err != nil {
+			return fmt.Errorf("list exam token %s failed: %w", token, err)
+		}
+		if len(existing) > 0 {
+			if payload.sharedTokens {
+				id := stringValue(existing[0]["id"])
+				if _, err := i.Client.Update("exam_tokens", id, map[string]any{"is_shared": true}); err != nil {
+					return fmt.Errorf("update exam token %s failed: %w", token, err)
+				}
+			}
+			continue
+		}
 		if _, err := i.Client.Create("exam_tokens", map[string]any{
-			"exam_id": examID,
-			"token":   token,
-			"is_used": false,
+			"exam_id":   examID,
+			"token":     token,
+			"is_used":   false,
+			"is_shared": payload.sharedTokens,
 		}); err != nil {
 			return fmt.Errorf("exam token %s failed: %w", token, err)
 		}
@@ -623,6 +652,10 @@ func (i *Importer) questionPayload(doc Document) map[string]any {
 func (i *Importer) examPayload(doc Document) examImport {
 	questions := i.resolveSourceIDList(doc.Meta, "question_source_ids", "question_ids", "question")
 	tokens := stringSlice(doc.Meta["tokens"])
+	points := intValue(doc.Meta["points_per_question"], 10)
+	if points <= 0 {
+		points = 10
+	}
 	duration := intValue(doc.Meta["duration_min"], 30) * 60
 	if duration == 0 {
 		duration = 1800
@@ -639,8 +672,10 @@ func (i *Importer) examPayload(doc Document) examImport {
 			"show_explanation_after": boolValue(doc.Meta["show_explanation_after"], true),
 			"is_active":              boolValue(doc.Meta["is_active"], false),
 		},
-		questions: questions,
-		tokens:    tokens,
+		questions:    questions,
+		tokens:       tokens,
+		points:       points,
+		sharedTokens: boolValue(doc.Meta["shared_tokens"], false),
 	}
 }
 

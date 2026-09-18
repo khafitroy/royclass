@@ -298,12 +298,18 @@ class_source_id: class-7
 title: UH 1 - Bilangan Bulat
 description: Ulangan harian bilangan bulat.
 duration_min: 30
+points_per_question: 10
 question_source_ids:
   - question-kelas-7-bilangan-bulat-001
 tokens:
   - UH1-BIL-001
+shared_tokens: false
 is_active: true
 ```
+
+`points_per_question` bersifat opsional dan menentukan bobot setiap soal dalam
+ujian. Jika tidak diisi, nilainya 10. `shared_tokens` juga opsional; jika
+bernilai `true`, token dapat dipakai oleh lebih dari satu peserta.
 
 Catatan:
 

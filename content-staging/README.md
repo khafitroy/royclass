@@ -10,17 +10,26 @@ Wajib baca dulu:
 content-staging/BOT-SEEDING-RULES.md
 ```
 
+Audit arsitektur dan SOP publikasi CBT:
+
+```text
+docs/CBT-AUDIT-DAN-SOP.md
+```
+
+Runtime produksi menggunakan repo `/home/pakgun/royclass` untuk menjalankan
+importer. Target publiknya adalah `https://lms.royzy.web.id/`.
+
 Letakkan markdown di sini, lalu jalankan:
 
 ```bash
-cd /home/pgun/dev/gezy/gezyclass/ai-bot
+cd /home/pakgun/royclass/ai-bot
 go run . sync --staging-dir ../content-staging
 ```
 
 Command legacy sekarang juga menulis ke staging:
 
 ```bash
-cd /home/pgun/dev/gezy/gezyclass/ai-bot
+cd /home/pakgun/royclass/ai-bot
 go run . material create --class 7 --chapter "Bilangan Bulat" --subchapter "Pengenalan Bilangan Bulat" --title "Pengenalan Bilangan Bulat"
 go run . article create --title "Mengenal Aljabar" --category "Aljabar"
 go run . exam create --title "UH 1 - Bilangan Bulat" --class 7 --questions 10 --tokens 5 --duration 30

@@ -58,7 +58,7 @@ Di VPS:
 Bot harus menjalankan command dari:
 
 ```bash
-cd /var/www/class.gezytech.web.id/ai-bot
+cd /home/pakgun/royclass/ai-bot
 ```
 
 Default staging dir:
@@ -110,8 +110,8 @@ Setelah dry-run berhasil dan backup berhasil:
 Setelah `sync`, bot harus memeriksa:
 
 ```bash
-curl -I https://class.gezytech.web.id/
-curl -I https://class.gezytech.web.id/api/health
+curl -I https://lms.royzy.web.id/
+curl -I https://lms.royzy.web.id/api/health
 ```
 
 Jika endpoint tidak sehat, bot wajib melaporkan error dan tidak melakukan perubahan lanjutan.
@@ -356,8 +356,8 @@ Command manual untuk inspeksi aman:
 ```bash
 find ../content-staging -type f
 sed -n '1,160p' ../content-staging/path/to/file.md
-curl -I https://class.gezytech.web.id/
-curl -I https://class.gezytech.web.id/api/health
+curl -I https://lms.royzy.web.id/
+curl -I https://lms.royzy.web.id/api/health
 ```
 
 ## Jika Terjadi Error

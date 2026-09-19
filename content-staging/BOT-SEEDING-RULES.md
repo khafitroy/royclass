@@ -318,6 +318,17 @@ Catatan:
 - Token baru boleh dibuat di staging.
 - Token yang sudah dipakai tidak boleh dihapus.
 
+#### Format ringkas satu file
+
+Untuk ujian baru, soal dapat ditulis langsung di front matter `questions` pada
+satu file exam. Lihat `examples/exam-inline.md.example`. Setiap item dapat
+memakai `source_id`; jika dikosongkan, importer membuat ID stabil berdasarkan
+source ID exam dan nomor urut soal. Gunakan format ini agar tidak perlu membuat
+satu file Markdown untuk setiap soal.
+
+Format lama dengan `question_source_ids` dan file `kind: question` terpisah
+tetap didukung untuk data yang sudah ada.
+
 ## Validasi Konten
 
 Sebelum `sync`, bot wajib memeriksa:

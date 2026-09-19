@@ -1,0 +1,46 @@
+---
+kind: exam
+source_id: exam-kelas-9-contoh-inline
+class_source_id: class-9
+title: "Contoh CBT Satu File"
+description: "Semua soal ditulis di file exam ini."
+duration_min: 30
+points_per_question: 5
+tokens:
+  - CONTOH-001
+shared_tokens: false
+random_questions: true
+random_options: true
+show_score_after: true
+show_explanation_after: false
+is_active: true
+questions:
+  - source_id: exam-kelas-9-contoh-inline-question-001
+    type: pg
+    difficulty: mudah
+    question: |
+      Which sentence expresses an opinion?
+    options:
+      - text: "I think the library should open longer."
+        score: 1
+      - text: "The library opens at seven."
+        score: 0
+    answer:
+      selected_index: 0
+    explanation: "The phrase 'I think' introduces an opinion."
+  - source_id: exam-kelas-9-contoh-inline-question-002
+    type: bs
+    difficulty: mudah
+    question: |
+      A caption can help explain the message of an image.
+    options:
+      - text: "Benar"
+        score: 1
+      - text: "Salah"
+        score: 0
+    answer:
+      selected_index: 0
+---
+Dokumen ini adalah contoh format ringkas: satu file exam berisi metadata dan
+seluruh soal. Field questions bersifat opsional; format lama dengan file
+question terpisah tetap didukung.

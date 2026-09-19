@@ -19,6 +19,11 @@ docs/CBT-AUDIT-DAN-SOP.md
 Runtime produksi menggunakan repo `/home/pakgun/royclass` untuk menjalankan
 importer. Target publiknya adalah `https://lms.royzy.web.id/`.
 
+Untuk CBT baru, gunakan format ringkas satu file exam yang berisi `questions`.
+Contohnya ada di `content-staging/examples/exam-inline.md.example`. Format
+lama dengan satu file untuk setiap soal tetap didukung untuk kompatibilitas,
+tetapi tidak perlu dipakai untuk ujian baru.
+
 Letakkan markdown di sini, lalu jalankan:
 
 ```bash

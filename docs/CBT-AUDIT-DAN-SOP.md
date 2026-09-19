@@ -50,6 +50,17 @@ Pada akhir audit, kondisi live terverifikasi sebagai berikut:
 
 ## Pelajaran khusus dari asesmen Bahasa Inggris Kelas 9
 
+### Format ringkas yang sekarang didukung
+
+Untuk ujian baru, seluruh soal dapat ditulis di satu file `kind: exam` melalui
+field `questions`. Importer akan membuat atau memperbarui record PocketBase
+question secara internal dan menghubungkannya ke exam. Jadi penulis tidak perlu
+membuat satu file Markdown untuk setiap soal. Lihat contoh praktis di
+`content-staging/examples/exam-inline.md.example`.
+
+Format satu-file-per-question tetap dipertahankan hanya untuk kompatibilitas
+dengan data lama.
+
 Format yang berhasil dipakai adalah:
 
 ~~~yaml

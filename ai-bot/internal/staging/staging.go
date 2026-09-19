@@ -300,7 +300,23 @@ func (i *Importer) upsert(doc Document, collection string, payload map[string]an
 }
 
 func (i *Importer) upsertExam(doc Document, result *SeedResult) error {
-	payload := i.examPayload(doc)
+	payload, err := i.examPayload(doc)
+	if err != nil {
+		return fmt.Errorf("%s: invalid inline questions: %w", doc.Path, err)
+	}
+	for _, questionDoc := range payload.inlineQuestions {
+		result.Processed++
+		if err := i.upsert(questionDoc, "questions", i.questionPayload(questionDoc), result); err != nil {
+			return err
+		}
+		if record, ok := i.State.Records[stateKey("question", questionDoc.SourceID)]; ok && record.RecordID != "" {
+			payload.questions = append(payload.questions, record.RecordID)
+		} else {
+			// Dry-run has no newly-created record ID; the relation is not written
+			// in that mode, but retaining the source ID keeps the payload useful.
+			payload.questions = append(payload.questions, questionDoc.SourceID)
+		}
+	}
 	key := stateKey(doc.Kind, doc.SourceID)
 	if existing, ok := i.State.Records[key]; ok && existing.RecordID != "" {
 		if i.Opts.DryRun {
@@ -382,11 +398,12 @@ func (i *Importer) clearExamRelations(examID string) error {
 }
 
 type examImport struct {
-	examFields   map[string]any
-	questions    []string
-	tokens       []string
-	points       int
-	sharedTokens bool
+	examFields      map[string]any
+	questions       []string
+	inlineQuestions []Document
+	tokens          []string
+	points          int
+	sharedTokens    bool
 }
 
 func (i *Importer) syncExamRelations(examID string, payload examImport) error {
@@ -649,8 +666,12 @@ func (i *Importer) questionPayload(doc Document) map[string]any {
 	return payload
 }
 
-func (i *Importer) examPayload(doc Document) examImport {
+func (i *Importer) examPayload(doc Document) (examImport, error) {
 	questions := i.resolveSourceIDList(doc.Meta, "question_source_ids", "question_ids", "question")
+	inlineQuestions, err := inlineQuestionDocuments(doc)
+	if err != nil {
+		return examImport{}, err
+	}
 	tokens := stringSlice(doc.Meta["tokens"])
 	points := intValue(doc.Meta["points_per_question"], 10)
 	if points <= 0 {
@@ -672,10 +693,105 @@ func (i *Importer) examPayload(doc Document) examImport {
 			"show_explanation_after": boolValue(doc.Meta["show_explanation_after"], true),
 			"is_active":              boolValue(doc.Meta["is_active"], false),
 		},
-		questions:    questions,
-		tokens:       tokens,
-		points:       points,
-		sharedTokens: boolValue(doc.Meta["shared_tokens"], false),
+		questions:       questions,
+		inlineQuestions: inlineQuestions,
+		tokens:          tokens,
+		points:          points,
+		sharedTokens:    boolValue(doc.Meta["shared_tokens"], false),
+	}, nil
+}
+
+// inlineQuestionDocuments converts an optional questions: list on an exam
+// document into the same internal question documents used by the legacy
+// one-file-per-question format. The PocketBase data model stays unchanged,
+// while authors can maintain one Markdown file per exam.
+func inlineQuestionDocuments(exam Document) ([]Document, error) {
+	raw, ok := exam.Meta["questions"]
+	if !ok || raw == nil {
+		return nil, nil
+	}
+	items, ok := raw.([]any)
+	if !ok {
+		return nil, fmt.Errorf("questions must be a YAML list")
+	}
+
+	classSourceID := stringValue(exam.Meta["class_source_id"])
+	directClassID := stringValue(exam.Meta["class_id"])
+	questions := make([]Document, 0, len(items))
+	for idx, rawItem := range items {
+		item, ok := stringMap(rawItem)
+		if !ok {
+			return nil, fmt.Errorf("questions[%d] must be a YAML object", idx+1)
+		}
+		sourceID := stringValue(item["source_id"])
+		if sourceID == "" {
+			sourceID = fmt.Sprintf("%s-question-%03d", exam.SourceID, idx+1)
+		}
+		question := stringValue(item["question"])
+		if question == "" {
+			question = stringValue(item["prompt"])
+		}
+		if question == "" {
+			return nil, fmt.Errorf("questions[%d] needs question or prompt", idx+1)
+		}
+
+		meta := map[string]any{
+			"kind":        "question",
+			"source_id":   sourceID,
+			"type":        stringValue(item["type"]),
+			"difficulty":  stringValue(item["difficulty"]),
+			"explanation": stringValue(item["explanation"]),
+		}
+		if meta["type"] == "" {
+			meta["type"] = "pg"
+		}
+		if classSourceID != "" {
+			meta["class_source_id"] = classSourceID
+		} else if directClassID != "" {
+			meta["class_id"] = directClassID
+		}
+		if options, exists := item["options_json"]; exists {
+			meta["options_json"] = options
+		} else if options, exists := item["options"]; exists {
+			meta["options_json"] = options
+		}
+		if answer, exists := item["answer_json"]; exists {
+			meta["answer_json"] = answer
+		} else if answer, exists := item["answer"]; exists {
+			meta["answer_json"] = answer
+		}
+		serialized, err := yaml.Marshal(item)
+		if err != nil {
+			return nil, fmt.Errorf("questions[%d] could not be hashed: %w", idx+1, err)
+		}
+		questions = append(questions, Document{
+			Path:     fmt.Sprintf("%s#questions[%d]", exam.Path, idx+1),
+			Kind:     "question",
+			SourceID: sourceID,
+			Meta:     meta,
+			Body:     question,
+			Hash:     hashDocument(string(serialized)),
+		})
+	}
+	return questions, nil
+}
+
+func stringMap(value any) (map[string]any, bool) {
+	switch typed := value.(type) {
+	case map[string]any:
+		return typed, true
+	case map[any]any:
+		out := make(map[string]any, len(typed))
+		for key, value := range typed {
+			name, ok := key.(string)
+			if !ok {
+				return nil, false
+			}
+			out[name] = value
+		}
+		return out, true
+	default:
+		return nil, false
 	}
 }
 

@@ -6,6 +6,12 @@
       "hash": "",
       "updated_at": "2026-09-16T00:00:00Z"
     },
+    "exam:exam-kelas9-bahasa-inggris-komunikasi-opini-neweng": {
+      "collection": "exams",
+      "record_id": "uxz8u7494hry93k",
+      "hash": "cb123e4358ea3efe4184a9734ff1f21903d8b38a46a371f19b7796975f039d34",
+      "updated_at": "2026-09-19T21:58:36.249745021+07:00"
+    },
     "exam:exam-kelas9-bahasa-inggris-tp-komunikasi-opini": {
       "collection": "exams",
       "record_id": "e31b5ex1n310lck",
@@ -131,6 +137,126 @@
       "record_id": "5py3218z4tzt75g",
       "hash": "ba62c3051e8f2a7b1f8d759d2a1f7d67adaec150aeb86af94007090c5808a419",
       "updated_at": "2026-09-18T09:08:59.213101494+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-001": {
+      "collection": "questions",
+      "record_id": "5vv9zydy81kg1h3",
+      "hash": "8a5a6eddc8357876938cb1d5dbaa01a8faa093ad48d01930923843eefb12d2ed",
+      "updated_at": "2026-09-19T21:58:36.120754256+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-002": {
+      "collection": "questions",
+      "record_id": "s0640p2504f1d07",
+      "hash": "4e0787d5d29fb7f7cdf17a9ed2d191fe4c2fc66f74020bf2efaaf042a3f3ca93",
+      "updated_at": "2026-09-19T21:58:36.12394413+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-003": {
+      "collection": "questions",
+      "record_id": "lw4878se8a8mn25",
+      "hash": "d492b759b012f4aa59ddcccc08422ae0060c483045f534a3ac1758dcc1ad32ae",
+      "updated_at": "2026-09-19T21:58:36.12727589+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-004": {
+      "collection": "questions",
+      "record_id": "medxom39xcd8d2q",
+      "hash": "a623b884c4c03475aacff4e83b672a933087dc8ab35debd251053537544a3e89",
+      "updated_at": "2026-09-19T21:58:36.130579764+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-005": {
+      "collection": "questions",
+      "record_id": "66r7457tas79kwr",
+      "hash": "e545e456aed1637459bdeda142dd40fd3badb2a396629babf949e5d3f7a36175",
+      "updated_at": "2026-09-19T21:58:36.13330931+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-006": {
+      "collection": "questions",
+      "record_id": "ts434484421j0wc",
+      "hash": "b8e96c0ebc591e483309d9eb0f1cf9a2872b8be03b111f7123b2fd24d9f4e4e1",
+      "updated_at": "2026-09-19T21:58:36.136462005+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-007": {
+      "collection": "questions",
+      "record_id": "uo4594dm85ns7w4",
+      "hash": "cb0b903dbdf43bbb669cdb84da9b0995550297d6c050aa58c036309a153c784b",
+      "updated_at": "2026-09-19T21:58:36.139510291+07:00"
+    },
+    "question:question-kelas9-neweng-tp1-008": {
+      "collection": "questions",
+      "record_id": "75f3ukfp7397h60",
+      "hash": "8280698d4360f296ad082cb4b143a945fc32494854ff526a1d5fcfc745cc5aa7",
+      "updated_at": "2026-09-19T21:58:36.142359152+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-001": {
+      "collection": "questions",
+      "record_id": "8p6a3aanswo6v1c",
+      "hash": "deaa17778ab0fe77cd76662afab781cf4368a9b7006b0d1287e2c665be386763",
+      "updated_at": "2026-09-19T21:58:36.145025399+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-002": {
+      "collection": "questions",
+      "record_id": "s3cpw772fi7ug21",
+      "hash": "b38293b69f554cbfbbfaf6fe1a894e40432631f2b644b4133d5f6c279fe9de0f",
+      "updated_at": "2026-09-19T21:58:36.147852096+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-003": {
+      "collection": "questions",
+      "record_id": "xo80kz7pv615m93",
+      "hash": "a7cf5cc9a2fa7e026f420cb931ed1849a8be5b37d3b31754181cb7bccac4d7a8",
+      "updated_at": "2026-09-19T21:58:36.150391002+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-004": {
+      "collection": "questions",
+      "record_id": "1188yknycc0x6k2",
+      "hash": "a05a6827fbd78cfe4e5a5d39d77d352a67a3fa1a624bfa41144a5af93a2ec572",
+      "updated_at": "2026-09-19T21:58:36.153139157+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-005": {
+      "collection": "questions",
+      "record_id": "86148u35h1tl250",
+      "hash": "d26b79dcffcfdad5efd00574319417fdb4a99e6ab642374209bb8e65398fef08",
+      "updated_at": "2026-09-19T21:58:36.156386794+07:00"
+    },
+    "question:question-kelas9-neweng-tp2-006": {
+      "collection": "questions",
+      "record_id": "w2gpga3d4vt3fr4",
+      "hash": "9c98059b8213f4ccb3c0833df79b7a152cf6ab06fa5e57d02aa11d7e88171ba7",
+      "updated_at": "2026-09-19T21:58:36.159482767+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-001": {
+      "collection": "questions",
+      "record_id": "sk9td7325o019b5",
+      "hash": "a5922f9655df2bb767887a82fdff16ccb4995c5cb7ab646bf9869a64c99e4a58",
+      "updated_at": "2026-09-19T21:58:36.162024147+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-002": {
+      "collection": "questions",
+      "record_id": "9g9ab34jlzs0fgh",
+      "hash": "45ef0d1f94f5ddb900361edfd24810ee9c05bcbf34314db96e10d8fd88e92a35",
+      "updated_at": "2026-09-19T21:58:36.164753183+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-003": {
+      "collection": "questions",
+      "record_id": "7ie76e22j310t6d",
+      "hash": "5d6c095a6c1b2286ca2c3d95a871280e0b2b1a90fa9b344eb42e4c2db97ce9d1",
+      "updated_at": "2026-09-19T21:58:36.167792473+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-004": {
+      "collection": "questions",
+      "record_id": "5qb0a1w1jvau9hi",
+      "hash": "68f92788187f231d388f2b04d50c6e834580448ba88fbd0ef90f82589073d6dc",
+      "updated_at": "2026-09-19T21:58:36.170769325+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-005": {
+      "collection": "questions",
+      "record_id": "4k2g5a0mf5p2w84",
+      "hash": "e218e6b98170bbd5d2b555397fd79c16cbf09e072641660f67fe7660494eb440",
+      "updated_at": "2026-09-19T21:58:36.173198817+07:00"
+    },
+    "question:question-kelas9-neweng-tp3-006": {
+      "collection": "questions",
+      "record_id": "h5z90qm1y4175j1",
+      "hash": "d6008e4db352e353bb362ed44c882ea80c18771187e29398a249ec6e9f14c607",
+      "updated_at": "2026-09-19T21:58:36.175791839+07:00"
     }
   }
 }

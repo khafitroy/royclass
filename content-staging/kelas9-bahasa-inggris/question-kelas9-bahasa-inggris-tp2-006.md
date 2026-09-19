@@ -1,1 +1,0 @@
-../question-kelas9-bahasa-inggris-tp2-006.md

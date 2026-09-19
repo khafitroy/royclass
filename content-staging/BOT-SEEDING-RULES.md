@@ -19,6 +19,12 @@ Bot boleh membantu mengelola konten GezyClass dengan cara aman:
 - `hugo --minify` dan swap `public/` hanya boleh dilakukan melalui command `ai-bot sync`.
 - Setiap file harus idempotent: menjalankan `sync` berulang tidak boleh membuat duplikasi.
 - Semua file harus memakai `source_id` stabil.
+- **CBT baru wajib ditulis dalam satu file `kind: exam`.** Seluruh soal ditulis
+  di field `questions` pada file exam tersebut; bot membuat record soal dan
+  relasinya secara internal.
+- Bot dilarang membuat satu file Markdown terpisah untuk setiap soal CBT baru.
+- Format satu-file-per-question hanya legacy untuk data lama dan tidak boleh
+  dipakai untuk ujian CBT baru.
 - Semua relasi baru harus memakai `*_source_id`, bukan ID PocketBase, kecuali data itu memang berasal dari record lama di PocketBase.
 - `order` wajib ada untuk setiap `chapter`, `subchapter`, `material`, `example`, dan `exercise`.
 - `order` menentukan urutan baca dan navigasi `sebelumnya / berikutnya` di Hugo.
@@ -238,7 +244,7 @@ order: 1
 
 Body Markdown menjadi field `question`.
 
-### `question`
+### `question` (legacy, bukan untuk CBT baru)
 
 ```yaml
 kind: question
@@ -258,6 +264,10 @@ explanation: "Karena -8 + 12 = 4."
 ```
 
 Body Markdown menjadi field `question`.
+
+Format ini hanya dipertahankan agar data lama tetap dapat disinkronkan. Untuk
+CBT baru, jangan membuat file `kind: question`; gunakan `questions` di dalam
+satu file `kind: exam` seperti contoh berikut.
 
 Tipe soal yang boleh dipakai:
 
@@ -293,18 +303,46 @@ Body Markdown menjadi field `content`.
 
 ```yaml
 kind: exam
-source_id: exam-kelas-7-uh1-bilangan-bulat
+source_id: exam-kelas-9-bahasa-inggris-komunikasi-opini
 class_source_id: class-7
-title: UH 1 - Bilangan Bulat
-description: Ulangan harian bilangan bulat.
-duration_min: 30
-points_per_question: 10
-question_source_ids:
-  - question-kelas-7-bilangan-bulat-001
+title: Asesmen Bahasa Inggris Kelas 9
+description: Ujian Bahasa Inggris tentang komunikasi dan opini.
+duration_min: 80
+points_per_question: 5
 tokens:
-  - UH1-BIL-001
-shared_tokens: false
+  - TOKEN-BARU
+shared_tokens: true
+random_questions: true
+random_options: true
+show_score_after: true
+show_explanation_after: false
 is_active: true
+questions:
+  - source_id: question-kelas9-bahasa-inggris-001
+    type: pg
+    difficulty: mudah
+    question: |
+      Which sentence expresses an opinion?
+    options:
+      - text: "I think the library needs more books."
+        score: 1
+      - text: "The library opens at seven."
+        score: 0
+    answer:
+      selected_index: 0
+    explanation: "The phrase 'I think' introduces an opinion."
+  - source_id: question-kelas9-bahasa-inggris-002
+    type: bs
+    difficulty: mudah
+    question: |
+      A caption can explain the message of an image.
+    options:
+      - text: "Benar"
+        score: 1
+      - text: "Salah"
+        score: 0
+    answer:
+      selected_index: 0
 ```
 
 `points_per_question` bersifat opsional dan menentukan bobot setiap soal dalam
@@ -313,21 +351,21 @@ bernilai `true`, token dapat dipakai oleh lebih dari satu peserta.
 
 Catatan:
 
-- Untuk soal lama yang sudah ada di PocketBase, `question_ids` boleh berisi ID PocketBase langsung.
-- Untuk soal yang dibuat dari staging, gunakan `question_source_ids`.
+- Field `questions` wajib berisi semua soal untuk CBT baru.
+- Setiap item `questions` memakai `type`: `pg`, `mr`, atau `bs`.
+- `options` berisi objek `text` dan `score`; kunci penilaian berasal dari
+  opsi dengan `score: 1`.
+- `answer.selected_index` berupa angka untuk `pg`/`bs` dan array angka untuk
+  `mr`.
+- `source_id` pada setiap item soal sebaiknya ditulis eksplisit dan stabil.
+  Jika kosong, bot membuat ID berdasarkan source ID exam dan nomor urut.
+- `question_ids` dan `question_source_ids` hanya boleh dipakai untuk menjaga
+  kompatibilitas exam lama, bukan untuk CBT baru.
 - Token baru boleh dibuat di staging.
 - Token yang sudah dipakai tidak boleh dihapus.
 
-#### Format ringkas satu file
-
-Untuk ujian baru, soal dapat ditulis langsung di front matter `questions` pada
-satu file exam. Lihat `examples/exam-inline.md.example`. Setiap item dapat
-memakai `source_id`; jika dikosongkan, importer membuat ID stabil berdasarkan
-source ID exam dan nomor urut soal. Gunakan format ini agar tidak perlu membuat
-satu file Markdown untuk setiap soal.
-
-Format lama dengan `question_source_ids` dan file `kind: question` terpisah
-tetap didukung untuk data yang sudah ada.
+Contoh lengkap 20 soal satu-file ada di
+`examples/exam-inline.md.example`.
 
 ## Validasi Konten
 
@@ -338,8 +376,13 @@ Sebelum `sync`, bot wajib memeriksa:
 - Semua `source_id` unik.
 - Semua relasi `*_source_id` punya file sumber atau sudah ada di `.seeder-state.json`.
 - Tidak ada field kosong untuk `title`, `slug`, atau relasi wajib.
-- Soal pilihan ganda punya minimal 2 opsi.
-- Soal pilihan ganda punya tepat satu opsi dengan `score: 1`, kecuali tipe memang mengizinkan multi jawaban.
+- CBT baru memiliki tepat satu file `kind: exam` dan tidak memiliki file
+  `kind: question` terpisah.
+- Field `questions` tidak kosong dan setiap item memiliki `type`, `question`,
+  minimal 2 `options`, dan `answer`.
+- Soal `pg` dan `bs` memiliki tepat satu opsi dengan `score: 1`; soal `mr`
+  memiliki semua opsi benar yang ditandai `score: 1`.
+- Jumlah item `questions`, distribusi tipe, dan total bobot sesuai permintaan.
 - LaTeX tidak rusak secara jelas: delimiter `$...$` dan `$$...$$` berpasangan.
 
 ## Kebijakan Publish
@@ -354,9 +397,6 @@ Sebelum `sync`, bot wajib memeriksa:
 ```bash
 ./ai-bot material create ...
 ./ai-bot article create ...
-./ai-bot exam create ...
-./ai-bot exam token ...
-./ai-bot exam delete-token ...
 ./ai-bot sync --dry-run --build-hugo=false
 ./ai-bot backup
 ./ai-bot sync
